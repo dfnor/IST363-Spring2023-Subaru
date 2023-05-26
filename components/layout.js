@@ -1,30 +1,17 @@
-import {Fragment} from 'react'
+// core
+import { Fragment } from 'react'
 
-import Header from './Header'
-import Footer from './Footer'
-import Link from 'next/link'
+// custom components
+import Footer from './Footer';
+import Header from './Header';
 
 const Layout = ({children}) => {
     return <Fragment>
         <Header />
-        <nav>
-            <ul>
-                <li>
-                    <Link href="/">
-                    Home
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/products">
-                    Products
-                    </Link>
-                </li>
-            </ul>
-        </nav>
         <main>
             {children}
         </main>
         <Footer />
-    </Fragment>
+    </Fragment>   
 }
 export default Layout

@@ -1,56 +1,57 @@
-import Image from 'next/image'
-import Layout from "../../components/Layout";
-import Link from 'next/link';
+import CallToAction from '../../components/CallToAction';
+import ColorPicker from '../../components/ColorPicker';
+import Container from '../../components/Container';
+import Image from 'next/image';
+import Layout from '../../components/Layout';
+import Showcase from '../../components/Showcase';
+import TrimPicker from '../../components/TrimPicker';
 
-import { getAllCarSlugs, getSingleVehicleBySlug } from '../../lib/api'
+import { getAllVehicleSlugs, getVehicleDataBySlug } from '../../lib/api'
 
 export async function getStaticPaths() {
-    const slugs = getAllCarSlugs();
-    const paths = slugs.map(slug => {
-          return {
-              params: {
-                  id: slug,
-              }
-          }
+    const vehicles = await getAllVehicleSlugs();
+    //console.log({vehicles});
+    const paths = vehicles.map((vehicle) => {
+        return {
+            params: {
+                id: vehicle.node.slug
+            }
+        }
     })
+    
     return {
-      paths,
-      fallback: false,
-    //    /\ fallback will show content when url path doesn't exist, false means its will be traditional 404 error
-    };
-}
-
-export async function getStaticProps({params}) {
-    const slug = params.id
-// Get external data from the file system, API, DB, etc.
-const data = getSingleVehicleBySlug(slug);
-
-// The value of the `props` key will be
-//  passed to the `Home` component
-//  {} <= is a product
-return {
-    props: {
-        data
+      paths: paths,
+      fallback: false, // can also be true or 'blocking'
     }
-}
-}
+  }
   
-const SingleCarTemplate = ({ data }) => {
-    const { model, slug } = data;
+  // `getStaticPaths` requires using `getStaticProps`
+  export async function getStaticProps({params}) {
+    const { id } = params;
+    //console.log({id});
+    const vehicleData = await getVehicleDataBySlug(id);
+    return {
+      // Passed to the page component as props
+      props: { 
+        vehicleData
+      },
+    }
+  }
+  
+  export default function SingleVehiclePage({ vehicleData }) {
+    const { title, featuredImage, vehicleInformation } = vehicleData;
+    const { showcase, trimLevels, vehicleColors  } = vehicleInformation;
+    //console.log({trimLevels});
     return <Layout>
-        <h4>
-            <Link href="/vehicles">
-                &laquo; Back to Vehicles page
-            </Link>
-        </h4>
-        <h1>{model}</h1>
-        <Image 
-            src={`/vehicles/${slug}/medium.webp`}
-            alt={`${model} car`}
-            width={350}
-            height={185}
+        <Showcase 
+          subheadline={`Subaru ${title}`}
+          headline={showcase.headline ? showcase.headline : null}
+          backgroundImage={featuredImage ? featuredImage.node : null}
         />
+        <Container>
+          <TrimPicker trimLevels={trimLevels} />
+          <ColorPicker vehicleColors={vehicleColors} />
+        </Container>
+        <CallToAction vehicleName={title} />
     </Layout>
 }
-export default SingleCarTemplate;
-
